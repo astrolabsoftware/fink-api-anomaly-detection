@@ -14,6 +14,7 @@ A data-driven project focused on detecting anomalies and forecasting potential o
 The `doc/` directory documents the problem definition, available data, and modeling methodology.
 
 - [Problem Definition](doc/00_problem.md) : Defines the problem, research questions, operational objectives, and some evaluation principles.
+- [Data Description](doc/01_data.md) : Describes the available logs, potential data sources, and limitations in term of data.
 
 ---
 ## Project Status
