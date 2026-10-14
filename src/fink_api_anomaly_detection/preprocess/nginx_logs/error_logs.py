@@ -6,7 +6,7 @@ from typing import Iterable
 
 import pandas as pd
 
-from common import (
+from .common import (
     iter_log_lines,
     parse_nginx_timestamp,
 )
