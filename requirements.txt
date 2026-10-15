@@ -3,3 +3,4 @@ matplotlib==3.10.9
 jupyterlab==4.6.3
 ipykernel
 humanize
+seaborn
