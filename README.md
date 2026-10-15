@@ -17,6 +17,13 @@ The `doc/` directory documents the problem definition, available data, and model
 - [Data Description](doc/01_data.md) : Describes the available logs, potential data sources, and limitations in term of data.
 
 ---
+
+## Modeling Methodology
+
+The [notebooks/](notebooks/) follow the methodology described gradually in the project documentation. They provide an experimental workflow covering data acquisition, preprocessing, exploration, feature engineering, baseline development, model (whether it beats or not the baseline) development and improvement,evaluation and analysis.
+
+---
+
 ## Project Status
 
 Early Research & development - data exploration and log pre-processing.
