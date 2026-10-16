@@ -26,4 +26,4 @@ The [notebooks/](notebooks/) follow the methodology described gradually in the p
 
 ## Project Status
 
-Early Research & development - data exploration and log pre-processing.
+Early Research & development - feature selection and the construction of temporal indicators.
