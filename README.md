@@ -15,7 +15,7 @@ The `doc/` directory documents the problem definition, available data, and model
 
 - [Problem Definition](doc/00_problem.md) : Defines the problem, research questions, operational objectives, and some evaluation principles.
 - [Data Description](doc/01_data.md) : Describes the available logs, potential data sources, and limitations in term of data.
-
+- [Feature Engineering Strategy](doc/02_feature_engineering_strategy.md) : Feature Engineering Strategy (doc) for Fink API anomaly detection and forecasting.
 ---
 
 ## Modeling Methodology
@@ -26,4 +26,4 @@ The [notebooks/](notebooks/) follow the methodology described gradually in the p
 
 ## Project Status
 
-Early Research & development - feature selection and the construction of temporal indicators.
+Early Research & development - feature engineering (implemtation ) & data set of temporal indicators.
