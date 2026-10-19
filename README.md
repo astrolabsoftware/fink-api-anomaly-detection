@@ -1,12 +1,10 @@
 # Fink API Forecasting & Anomaly Detection
 
-A data-driven project focused on detecting anomalies and forecasting potential outages in the Fink API using log analysis and machine learning.
+A data-driven project focused on detecting anomalies and forecasting potential outages in the Fink API using Nginx **log/system-log** analysis and machine learning.
 
 ## Objectives
 
-- Analyze the Nginx logs (the server in front of the API) and potentially the application logs from the API itself (Flask).
-- Detect anomalous patterns.
-- Identify potential indicators of API service interruptions or outages and send an alert to the operations team so they can intervene well before a failure occurs, by exploring forecasting methods. 
+Analyze `Nginx logs` (the server in front of the Fink API) and, where available, `system logs` (from node-exporter) and the `API Flask application logs` to **detect anomalous patterns with `anomaly-detection` methods and identify potential indicators of service interruptions or outages**, by exploring `forecasting` methods to alert the ops team early enough to intervene before a failure occurs.
 
 ---
 ## Documentation
@@ -26,4 +24,4 @@ The [notebooks/](notebooks/) follow the methodology described gradually in the p
 
 ## Project Status
 
-Early Research & development - feature engineering (implemtation ) & data set of temporal indicators.
+Research & development - baseline (refs model) development
