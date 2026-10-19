@@ -196,7 +196,26 @@ df_bnge = df[bnge_ft].copy()
 df_all = df[all_ft].copy()
 ```
 
-These configurations will be evaluated using the same model and evaluation procedure to isolate the contribution of each feature group. We will then repeat the comparisons across different baseline/models. Since the dataset does not contain labelled incidents, evaluation will focus on the consistency and interpretability of detected anomalies. 
+The implementation is available through the `features` package:
+
+```python
+from src.fink_api_anomaly_detection.features import (
+    build_feature_subsets,
+    build_temporal_features,
+)
+
+df = build_temporal_features(access_df, geo_df, errors_df)
+feature_sets = build_feature_subsets(df)
+```
+
+The three arguments are the DataFrames returned by the access-, geo-, and
+error-log preprocessing functions. The result contains `timestamp` and the 22
+features above, with one UTC row for every 5-minute (modifiable in src code) interval between the
+earliest and latest timestamp in the input data. Intervals without events are
+retained with zero-valued aggregates; the first temporal deltas are zero
+because there is no previous window. `build_feature_subsets` returns the five
+documented experiment configurations as separate DataFrames, without the
+`timestamp` column. These configurations will be evaluated using the same model and evaluation procedure to isolate the contribution of each feature group. We will then repeat the comparisons across different baseline/models. Since the dataset does not contain labelled incidents, evaluation will focus on the consistency and interpretability of detected anomalies. 
 
 ---
 ## Other possible experiences - Comparing Current Behaviour with Recent History
