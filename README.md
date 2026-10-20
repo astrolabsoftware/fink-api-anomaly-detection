@@ -14,6 +14,7 @@ The `doc/` directory documents the problem definition, available data, and model
 - [Problem Definition](doc/00_problem.md) : Defines the problem, research questions, operational objectives, and some evaluation principles.
 - [Data Description](doc/01_data.md) : Describes the available logs, potential data sources, and limitations in term of data.
 - [Feature Engineering Strategy](doc/02_feature_engineering_strategy.md) : Feature Engineering Strategy (doc) for Fink API anomaly detection and forecasting.
+- [Baselines definition](doc/03_baselines.md) : Defines the statistical baselines for anomaly detection.
 ---
 
 ## Modeling Methodology

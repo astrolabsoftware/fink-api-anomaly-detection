@@ -96,7 +96,7 @@ where $\mu$ and $\sigma$ are estimated on the reference period. An initial two-s
 **Principle.** Replace the mean and standard deviation with the median and the median absolute deviation (*Median Absolute Deviation*, MAD):
 
 $$
-m = \operatorname{median}(x), \quad MAD = \operatorname{median}(|x-m|)
+m = \mathrm{median}(x), \quad MAD = \mathrm{median}(|x-m|)
 $$
 
 $$
@@ -138,7 +138,7 @@ The factor `1.4826` converts the MAD into a robust estimate of the standard devi
 Let $N_t$ be the total number of requests (`request_count`) and $E_t$ the number of HTTP 5xx responses (`http_5xx_count`). A first assumption is:
 
 $$
-E_t \mid N_t \sim \operatorname{Binomiale}(N_t,p)
+E_t \mid N_t \sim \mathrm{Binomiale}(N_t,p)
 $$
 
 where $p$ is the error rate estimated on the reference. To detect an increase in errors:
@@ -154,7 +154,7 @@ A low tail probability gives a high score. Check $0\leq E_t\leq N_t$, handle $N_
 A first approximation is:
 
 $$
-R_t\sim\operatorname{Poisson}(\lambda)
+R_t\sim\mathrm{Poisson}(\lambda)
 $$
 
 where $\lambda$ is estimated on the reference. Use an upper-tail probability for spikes and a lower-tail probability for drops. To account for the time or day, estimate $\lambda$ by context.
