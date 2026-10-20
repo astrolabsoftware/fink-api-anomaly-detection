@@ -1,6 +1,8 @@
 # Data
 
-The initial dataset consists of Nginx logs collected from the Fink API.The raw data is stored locally in: `data/nginx_history_logs/`, it contains **27 compressed `.gz` files**, covering **9 days**, from **October 4 to October 12, 2026 inclusive**.
+The dataset consists of Nginx logs collected from the Fink API (ztf). The raw data is stored locally in `data/nginx_history_logs/`. It contains **42 compressed `.gz` files**: 14 files per category, with filename dates from **October 4 to October 17, 2026**.
+
+The filenames are dated one day after the events they contain. Parsed event timestamps range from **October 3, 2026 at 00:00 UTC** to **October 17, 2026 at 00:00 UTC**. This covers 14 days, with six records in the final partial day. 
 
 ## Data Privacy and Repository Policy
 
@@ -16,7 +18,7 @@ The dataset `data/nginx_history_logs` is organized into three categories:
 - `error-logs/`: Nginx error logs.
 - `geo-logs/`: geographical ( user country) information associated with requests.
 
-Each category currently contains one compressed log file per day.
+Each category contains one compressed log file per filename date.
 
 ```
 data/
@@ -30,7 +32,12 @@ data/
     │   ├── access.log-20261009.gz
     │   ├── access.log-20261010.gz
     │   ├── access.log-20261011.gz
-    │   └── access.log-20261012.gz
+    │   ├── access.log-20261012.gz
+    │   ├── access.log-20261013.gz
+    │   ├── access.log-20261014.gz
+    │   ├── access.log-20261015.gz
+    │   ├── access.log-20261016.gz
+    │   └── access.log-20261017.gz
     ├── error-logs
     │   ├── error.log-20261004.gz
     │   ├── error.log-20261005.gz
@@ -40,7 +47,12 @@ data/
     │   ├── error.log-20261009.gz
     │   ├── error.log-20261010.gz
     │   ├── error.log-20261011.gz
-    │   └── error.log-20261012.gz
+    │   ├── error.log-20261012.gz
+    │   ├── error.log-20261013.gz
+    │   ├── error.log-20261014.gz
+    │   ├── error.log-20261015.gz
+    │   ├── error.log-20261016.gz
+    │   └── error.log-20261017.gz
     └── geo-logs
         ├── geo.log-20261004.gz
         ├── geo.log-20261005.gz
@@ -50,7 +62,12 @@ data/
         ├── geo.log-20261009.gz
         ├── geo.log-20261010.gz
         ├── geo.log-20261011.gz
-        └── geo.log-20261012.gz
+        ├── geo.log-20261012.gz
+        ├── geo.log-20261013.gz
+        ├── geo.log-20261014.gz
+        ├── geo.log-20261015.gz
+        ├── geo.log-20261016.gz
+        └── geo.log-20261017.gz
 ```
 ---
 
@@ -78,6 +95,5 @@ Flask application logs may be integrated in a later stage. Also, if needed, addi
 
 The initial dataset has several limitations:
 
-- **Short observation period:** 9 days are insufficient to establish robust long-term or weekly traffic patterns.
+- **Short observation period:** 14 days provide only two weekly cycles, which is still insufficient to establish robust long-term (monthly cycles) patterns.
 - **Unknown incident labels:** historical outage timestamps have not been established as part of the dataset.
-

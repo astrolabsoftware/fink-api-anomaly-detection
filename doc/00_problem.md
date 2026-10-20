@@ -97,6 +97,4 @@ Outage forecasting requires reliable information about confirmed outages and the
 
 ## Temporal Validation and Data Limitations
 
-All evaluations must respect temporal order to avoid information leakage. When sufficient data is available, models will be evaluated
-on periods that occur after the periods used for model development. The initial observation period covers only a few days (9 days) [see doc/01_data.md](/doc/01_data.md). This is a significant limitation for identifying recurring traffic patterns, evaluating weekly seasonality, and establishing reliable baselines. And Finally, the availability of longer historical logs and confirmed incident records will determine which evaluation methods can be applied.
-
+All evaluations must respect temporal order to avoid information leakage. When sufficient data is available, models will be evaluated on periods that occur after the periods used for model development. The current observation period covers 14 days [see doc/01_data.md](/doc/01_data.md), providing only two weekly cycles. This remains a limitation for identifying recurring traffic patterns, like evaluating mounthly seasonality. The availability of longer historical logs and confirmed incident records will determine which evaluation methods can be applied.
