@@ -46,18 +46,18 @@ The reference period and the evaluation period must not overlap in the main expe
 
 ## 3. Available features
 
-The 22 current (+ Timestamps) features are grouped as follows:
+The 23 current (+ Timestamps) features are grouped as follows:
 
 - **Traffic:** `request_count`, `get_count`, `post_count`
 - **HTTP reliability:** `http_4xx_count`, `http_5xx_count`, `http_4xx_rate`, `http_5xx_rate`
 - **Clients:** `unique_client_count`
 - **Volume:** `bytes_sent_sum`
-- **Geography:** `unique_country_count`, `top_country_share`
+- **Geography:** `unique_country_count`, `top_country_share`, `top_country_share_without_france`
 - **Nginx errors:** `nginx_error_count`, `nginx_critical_count`, `nginx_timeout_count`, `nginx_connection_reset_count`, `nginx_broken_pipe_count`
 - **Endpoints:** `endpoint_api_count`, `endpoint_unrecognized_count`, `unique_endpoint_count`
 - **Temporal deltas:** `request_count_delta`, `http_5xx_rate_delta`, `nginx_error_count_delta`
 
-The notebook (03) five subsets are `baseline` (9 features), `baseline_nginx` (14), `baseline_nginx_geography` (16), `baseline_nginx_geography_endpoints` (19), and `all` (22). B6 is evaluated on each of these subsets. B1-B5 use only the features relevant to them.
+The notebook (03) five subsets are `baseline` (9 features), `baseline_nginx` (14), `baseline_nginx_geography` (17), `baseline_nginx_geography_endpoints` (20), and `all` (23). B6 is evaluated on each of these subsets. B1-B5 use only the features relevant to them.
 
 ## 4. Baselines
 
@@ -72,6 +72,8 @@ is\_anomaly_t = \bigvee_j \mathbb{1}[\text{rule}_j(X_t)]
 $$
 
 The shared score can be the maximum of the normalized scores for each rule or the number of triggered rules.
+
+The implementation uses explicitly configured limits: maximum `http_5xx_rate`, minimum and maximum `request_count`, maximum `nginx_timeout_count`, and maximum `nginx_error_count`. Any nonzero `nginx_critical_count` triggers its own rule. Limits are exceeded strictly; a request count strictly below its minimum triggers the low-volume rule. The anomaly score is the number of triggered rules, and an observation is anomalous when that score is greater than zero. Configure and validate these limits before the evaluation period; the baseline does not learn or tune them on the data being scored.
 
 **Limitations:** interpretable, but does not capture complex interactions well. Fixed thresholds can trigger during normal variations.
 

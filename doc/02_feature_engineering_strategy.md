@@ -78,6 +78,7 @@ This feature provides an indicator of the volume of data served by the API.
 |---|---|
 | `unique_country_count` | Number of distinct countries represented in the requests |
 | `top_country_share` | Proportion of requests originating from the most represented country |
+| `top_country_share_without_france` | Proportion of non-France requests originating from the most represented non-France country |
 
 These features describe changes in the geographical distribution of traffic. They are exploratory indicators and should only be retained (after testing) if they provide useful information for the anomaly detection.
 
@@ -117,17 +118,17 @@ For each delta, the calculation is: `Delta x_t = x_t - x_{t-1}`. These features 
 
 ## Example of the Final Temporal Dataset
 
-**#features =**22 (with timestamp = 23)
+**#features =**23 (with timestamp = 24)
 
 After aggregating the three DataFrames independently and merging the results by time window, the dataset will contain one row per 5-minute interval. The following table illustrates the proposed structure. **All values are illustrative.**
 
-| timestamp | request_count | get_count | post_count | http_4xx_count | http_5xx_count | http_4xx_rate | http_5xx_rate | unique_client_count | bytes_sent_sum | unique_country_count | top_country_share | nginx_error_count | nginx_critical_count | nginx_timeout_count | nginx_connection_reset_count | nginx_broken_pipe_count | endpoint_api_count | endpoint_unrecognized_count | unique_endpoint_count | request_count_delta | http_5xx_rate_delta | nginx_error_count_delta |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 10:00 | 420 | 30 | 390 | 12 | 3 | 0.0286 | 0.0071 | 35 | 8400000 | 8 | 0.42 | 1 | 0 | 0 | 1 | 0 | 390 | 30 | 45 | 20 | 0.0021 | 0 |
-| 10:05 | 510 | 38 | 472 | 18 | 6 | 0.0353 | 0.0118 | 42 | 9100000 | 9 | 0.39 | 4 | 1 | 1 | 2 | 1 | 475 | 35 | 51 | 90 | 0.0047 | 3 |
-| 10:10 | 1250 | 82 | 1168 | 45 | 106 | 0.0360 | 0.0848 | 68 | 21000000 | 14 | 0.31 | 17 | 3 | 6 | 5 | 3 | 1150 | 100 | 88 | 740 | 0.0730 | 13 |
-| 10:15 | 390 | 27 | 363 | 8 | 2 | 0.0205 | 0.0051 | 31 | 7800000 | 7 | 0.45 | 0 | 0 | 0 | 0 | 0 | 360 | 30 | 39 | -860 | -0.0797 | -17 |
-| 10:20 | 405 | 29 | 376 | 9 | 2 | 0.0222 | 0.0049 | 33 | 8000000 | 8 | 0.43 | 1 | 0 | 0 | 1 | 0 | 375 | 30 | 41 | 15 | -0.0002 | 1 |
+| timestamp | request_count | get_count | post_count | http_4xx_count | http_5xx_count | http_4xx_rate | http_5xx_rate | unique_client_count | bytes_sent_sum | unique_country_count | top_country_share | top_country_share_without_france | nginx_error_count | nginx_critical_count | nginx_timeout_count | nginx_connection_reset_count | nginx_broken_pipe_count | endpoint_api_count | endpoint_unrecognized_count | unique_endpoint_count | request_count_delta | http_5xx_rate_delta | nginx_error_count_delta |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 10:00 | 420 | 30 | 390 | 12 | 3 | 0.0286 | 0.0071 | 35 | 8400000 | 8 | 0.42 | 0.55 | 1 | 0 | 0 | 1 | 0 | 390 | 30 | 45 | 20 | 0.0021 | 0 |
+| 10:05 | 510 | 38 | 472 | 18 | 6 | 0.0353 | 0.0118 | 42 | 9100000 | 9 | 0.39 | 0.49 | 4 | 1 | 1 | 2 | 1 | 475 | 35 | 51 | 90 | 0.0047 | 3 |
+| 10:10 | 1250 | 82 | 1168 | 45 | 106 | 0.0360 | 0.0848 | 68 | 21000000 | 14 | 0.31 | 0.38 | 17 | 3 | 6 | 5 | 3 | 1150 | 100 | 88 | 740 | 0.0730 | 13 |
+| 10:15 | 390 | 27 | 363 | 8 | 2 | 0.0205 | 0.0051 | 31 | 7800000 | 7 | 0.45 | 0.58 | 0 | 0 | 0 | 0 | 0 | 360 | 30 | 39 | -860 | -0.0797 | -17 |
+| 10:20 | 405 | 29 | 376 | 9 | 2 | 0.0222 | 0.0049 | 33 | 8000000 | 8 | 0.43 | 0.54 | 1 | 0 | 0 | 1 | 0 | 375 | 30 | 41 | 15 | -0.0002 | 1 |
 
 #### Details (for features implemntation)
 
@@ -139,6 +140,7 @@ After aggregating the three DataFrames independently and merging the results by 
 - `endpoint_api_count` and `endpoint_unrecognized_count` should sum to `request_count` when every request has a classifiable endpoint. Requests with missing endpoints must be counted as unrecognized.
 - `unique_endpoint_count` counts all distinct endpoints requested during each window, including endpoints inside and outside `/api/v1/*`.
 - `top_country_share` is calculated as the number of requests from the most represented country divided by the total number of requests with available country information in that window. 
+- `top_country_share_without_france` uses only requests with available country information outside France; it is 0 when no such requests exist.
 - The 3 log sources must be aggregated independently and then merged using their time-window timestamps. **The DataFrames must not be joined row by row.**
 - All temporal calculations must use past and current observations only. Future information must not be used to calculate features intended for real time anomaly detection or forecasting.
 
@@ -146,7 +148,7 @@ After aggregating the three DataFrames independently and merging the results by 
 
 ## Feature Selection Strategy and Evaluation
 
-We have complete temporal dataset `df` containing 22 technical features, and `timestamp`, which will serve as the temporal index. Rather than using all features from the beginning, we will start with a compact baseline. We will then progressively add other feature groups to evaluate their impact on anomaly detection performance. The objective is to identify which features provide useful information and whether adding/removing features improves the results.
+We have complete temporal dataset `df` containing 23 technical features, and `timestamp`, which will serve as the temporal index. Rather than using all features from the beginning, we will start with a compact baseline. We will then progressively add other feature groups to evaluate their impact on anomaly detection performance. The objective is to identify which features provide useful information and whether adding/removing features improves the results.
 
 ### Comparing Feature Subsets
 
@@ -168,7 +170,7 @@ client_volume_ft = ["unique_client_count", "bytes_sent_sum"]
 
 nginx_ft = ["nginx_error_count", "nginx_critical_count", "nginx_timeout_count", "nginx_connection_reset_count", "nginx_broken_pipe_count"]
 
-geography_ft = ["unique_country_count", "top_country_share"]
+geography_ft = ["unique_country_count", "top_country_share", "top_country_share_without_france"]
 
 endpoint_ft = ["endpoint_api_count", "endpoint_unrecognized_count", "unique_endpoint_count"]
 
@@ -186,7 +188,7 @@ bng_ft = bn_ft + geography_ft
 # Baseline + Nginx errors + geographical features + endpoint features
 bnge_ft = bng_ft + endpoint_ft
 
-# All features (22)
+# All features (23)
 all_ft = bnge_ft + temporal_ft
 
 df_b = df[b_ft].copy()
@@ -209,7 +211,7 @@ feature_sets = build_feature_subsets(df)
 ```
 
 The three arguments are the DataFrames returned by the access-, geo-, and
-error-log preprocessing functions. The result contains `timestamp` and the 22
+error-log preprocessing functions. The result contains `timestamp` and the 23
 features above, with one UTC row for every 5-minute (modifiable in src code) interval between the
 earliest and latest timestamp in the input data. Intervals without events are
 retained with zero-valued aggregates; the first temporal deltas are zero

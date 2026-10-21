@@ -37,7 +37,7 @@ FEATURE_SUBSETS = {
 def build_temporal_features(access_df: pd.DataFrame, geo_df: pd.DataFrame, errors_df: pd.DataFrame) -> pd.DataFrame:
     """Build one row per WINDOW_SIZE interval from the three independent log sources.
 
-    The returned frame contains ``timestamp`` and 22 numeric features. The
+    The returned frame contains ``timestamp`` and 23 numeric features. The
     complete grid spans the earliest through latest timestamp found in any
     non-empty source.
     """
@@ -57,7 +57,7 @@ def build_temporal_features(access_df: pd.DataFrame, geo_df: pd.DataFrame, error
         if not feature.endswith(("_rate", "_share", "_delta"))
     ]
     result[count_features] = result[count_features].fillna(0).astype("int64")
-    rate_features = ["http_4xx_rate", "http_5xx_rate", "top_country_share"]
+    rate_features = ["http_4xx_rate","http_5xx_rate","top_country_share","top_country_share_without_france"]
     result[rate_features] = result[rate_features].fillna(0.0)
 
     result["request_count_delta"] = result["request_count"].diff().fillna(0)
