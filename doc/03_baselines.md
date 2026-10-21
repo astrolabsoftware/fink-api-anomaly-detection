@@ -2,7 +2,7 @@
 
 ## 1. Objective
 
-We define 6 baseline methods to evaluate future anomaly detectors on Nginx logs. We will try to implement all these baselines with dedicated code. Each baseline is simple, reproducible, and independent of the detection model that will be studied later (whether or not it outperforms these baselines). The objective is therefore to measure whether a more elaborate method detects unusual behavior better than explainable statistical references. In the absence of incident/anomaly labels, the results describe the ability to detect atypical observations/outliers. The different baselines are:
+We define 5 baseline methods to evaluate future anomaly detectors on Nginx logs. We will try to implement all these baselines with dedicated code. Each baseline is simple, reproducible, and independent of the detection model that will be studied later (whether or not it outperforms these baselines). The objective is therefore to measure whether a more elaborate method detects unusual behavior better than explainable statistical references. In the absence of incident/anomaly labels, the results describe the ability to detect atypical observations/outliers. The different baselines are:
 
 | Baseline | Method | Type |
 | --- | --- | --- |
@@ -10,8 +10,7 @@ We define 6 baseline methods to evaluate future anomaly detectors on Nginx logs.
 | B2 | Classical Z-score | Univariate, parametric |
 | B3 | Robust Z-score based on the median and MAD | Univariate, robust |
 | B4 | Conditional temporal reference | Univariate, temporal context |
-| B5 | Probabilistic model for counts and error rates | Univariate, probabilistic |
-| B6 | Robust Mahalanobis distance | Multivariate |
+| B5 | Robust Mahalanobis distance | Multivariate |
 
 ## 2. Baseline conventions
 
@@ -57,7 +56,7 @@ The 23 current (+ Timestamps) features are grouped as follows:
 - **Endpoints:** `endpoint_api_count`, `endpoint_unrecognized_count`, `unique_endpoint_count`
 - **Temporal deltas:** `request_count_delta`, `http_5xx_rate_delta`, `nginx_error_count_delta`
 
-The notebook (03) five subsets are `baseline` (9 features), `baseline_nginx` (14), `baseline_nginx_geography` (17), `baseline_nginx_geography_endpoints` (20), and `all` (23). B6 is evaluated on each of these subsets. B1-B5 use only the features relevant to them.
+The notebook (03) five subsets are `baseline` (9 features), `baseline_nginx` (14), `baseline_nginx_geography` (17), `baseline_nginx_geography_endpoints` (20), and `all` (23). B5 is evaluated on each of these subsets. B1-B4 use only the features relevant to them.
 
 ## 4. Baselines
 
@@ -131,39 +130,7 @@ The factor `1.4826` converts the MAD into a robust estimate of the standard devi
 
 **Limitations:** depends on the amount of historical data and may handle special days poorly, such as lasting changes in traffic.
 
-### B5 - Probabilistic model for counts and rates
-
-**Principle.** Estimate the rarity of an observation using a distribution suited to the signal, taking request volume into account.
-
-#### B5a - HTTP 5xx responses
-
-Let $N_t$ be the total number of requests (`request_count`) and $E_t$ the number of HTTP 5xx responses (`http_5xx_count`). A first assumption is:
-
-$$
-E_t \mid N_t \sim \mathrm{Binomiale}(N_t,p)
-$$
-
-where $p$ is the error rate estimated on the reference. To detect an increase in errors:
-
-$$
-S_t=-\log P(E\geq E_t\mid N_t,p)
-$$
-
-A low tail probability gives a high score. Check $0\leq E_t\leq N_t$, handle $N_t=0$ separately, and estimate $p$ on the reference only. Any smoothing applied to avoid degenerate probabilities must be specified.
-
-#### B5b - Request volume
-
-A first approximation is:
-
-$$
-R_t\sim\mathrm{Poisson}(\lambda)
-$$
-
-where $\lambda$ is estimated on the reference. Use an upper-tail probability for spikes and a lower-tail probability for drops. To account for the time or day, estimate $\lambda$ by context.
-
-**Limitations:** temporal dependence and overdispersion can invalidate theoretical calibration. The Poisson distribution is a first approximation, not an assumption to take for granted.
-
-### B6 - Robust Mahalanobis distance
+### B5 - Robust Mahalanobis distance
 
 **Principle.** Measure the multivariate distance of a window from the reference:
 
