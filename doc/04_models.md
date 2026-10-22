@@ -70,3 +70,8 @@ logical constraints between related features when constructing perturbations.
 
 ---
 
+
+
+# References 
+
+1- Isolation forest (sklearn implemntation) [doc](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html)
