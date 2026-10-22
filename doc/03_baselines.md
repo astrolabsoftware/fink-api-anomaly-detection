@@ -148,13 +148,6 @@ Without incident labels, precision, recall, or F1 cannot be presented as availab
 - **Stability**, variation in scores and alert rate between reference periods.
 - **Computational cost**, if relevant.
 
-For the B2-B4 notebook evaluation, an alert window is one flagged by at least
-one tested feature. Consecutive flagged five-minute windows form an alert
-sequence; its duration is the number of windows multiplied by five minutes.
-Temporal concentration is reported by UTC date and by four UTC day periods
-(00:00-06:00, 06:00-12:00, 12:00-18:00, and 18:00-24:00). Signal consistency
-is examined using per-feature alert rates, exact feature combinations, and
-pairwise feature co-occurrences.
 
 ### 5.3 Evaluation with synthetic perturbations
 
