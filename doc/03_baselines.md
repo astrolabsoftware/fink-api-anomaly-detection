@@ -2,7 +2,7 @@
 
 ## 1. Objective
 
-We define 5 baseline methods to evaluate future anomaly detectors on Nginx logs. We will try to implement all these baselines with dedicated code. Each baseline is simple, reproducible, and independent of the detection model that will be studied later (whether or not it outperforms these baselines). The objective is therefore to measure whether a more elaborate method detects unusual behavior better than explainable statistical references. In the absence of incident/anomaly labels, the results describe the ability to detect atypical observations/outliers. The different baselines are:
+We define 4 baseline methods to evaluate future anomaly detectors on Nginx logs. We will try to implement all these baselines with dedicated code. Each baseline is simple, reproducible, and independent of the detection model that will be studied later (whether or not it outperforms these baselines). The objective is therefore to measure whether a more elaborate method detects unusual behavior better than explainable statistical references. In the absence of incident/anomaly labels, the results describe the ability to detect atypical observations/outliers. The different baselines are:
 
 | Baseline | Method | Type |
 | --- | --- | --- |
@@ -10,7 +10,6 @@ We define 5 baseline methods to evaluate future anomaly detectors on Nginx logs.
 | B2 | Classical Z-score | Univariate, parametric |
 | B3 | Robust Z-score based on the median and MAD | Univariate, robust |
 | B4 | Conditional temporal reference | Univariate, temporal context |
-| B5 | Robust Mahalanobis distance | Multivariate |
 
 ## 2. Baseline conventions
 
@@ -56,7 +55,7 @@ The 23 current (+ Timestamps) features are grouped as follows:
 - **Endpoints:** `endpoint_api_count`, `endpoint_unrecognized_count`, `unique_endpoint_count`
 - **Temporal deltas:** `request_count_delta`, `http_5xx_rate_delta`, `nginx_error_count_delta`
 
-The notebook (03) five subsets are `baseline` (9 features), `baseline_nginx` (14), `baseline_nginx_geography` (17), `baseline_nginx_geography_endpoints` (20), and `all` (23). B5 is evaluated on each of these subsets. B1-B4 use only the features relevant to them.
+The notebook (03) provides five feature subsets: `baseline` (9 features), `baseline_nginx` (14), `baseline_nginx_geography` (17), `baseline_nginx_geography_endpoints` (20), and `all` (23). B1-B4 use only the features relevant to them.
 
 ## 4. Baselines
 
@@ -130,22 +129,6 @@ The factor `1.4826` converts the MAD into a robust estimate of the standard devi
 
 **Limitations:** depends on the amount of historical data and may handle special days poorly, such as lasting changes in traffic.
 
-### B5 - Robust Mahalanobis distance
-
-**Principle.** Measure the multivariate distance of a window from the reference:
-
-$$
-D_t^2=(X_t-\mu)^\top\Sigma^{-1}(X_t-\mu)
-$$
-
-where $X_t$ is the feature vector, $\mu$ the reference center, and $\Sigma$ its covariance. A robust version uses an estimator resistant to extreme values, for example the *Minimum Covariance Determinant* (MCD).
-
-**Example experiment:** test the five subsets separately: `baseline`, `baseline_nginx`, `baseline_nginx_geography`, `baseline_nginx_geography_endpoints`, and `all`.
-
-**Threshold:** calibrate it on a reference or a dedicated temporal validation set; do not assume a theoretical threshold is valid without empirical verification.
-
-**Limitations:** this method is useful for detecting unusual combinations of signals, but is less directly interpretable than univariate scores.
-
 ## 5. Evaluation protocol (unsupervised learning)
 
 ### 5.1 Temporal split
@@ -164,6 +147,14 @@ Without incident labels, precision, recall, or F1 cannot be presented as availab
 - **Signal consistency**, with the features that explain the alerts.
 - **Stability**, variation in scores and alert rate between reference periods.
 - **Computational cost**, if relevant.
+
+For the B2-B4 notebook evaluation, an alert window is one flagged by at least
+one tested feature. Consecutive flagged five-minute windows form an alert
+sequence; its duration is the number of windows multiplied by five minutes.
+Temporal concentration is reported by UTC date and by four UTC day periods
+(00:00-06:00, 06:00-12:00, 12:00-18:00, and 18:00-24:00). Signal consistency
+is examined using per-feature alert rates, exact feature combinations, and
+pairwise feature co-occurrences.
 
 ### 5.3 Evaluation with synthetic perturbations
 
@@ -186,5 +177,3 @@ Without labels, the number of detected anomaly windows, response to synthetic pe
 ## 6. References
 
 - NIST/SEMATECH, *e-Handbook of Statistical Methods*, “Detection of Outliers”: https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h.htm
-- Rousseeuw, P. J. & Van Driessen, K. (1999), “A Fast Algorithm for the Minimum Covariance Determinant Estimator”, *Technometrics*, 41(3), 212–223. DOI: https://doi.org/10.1080/00401706.1999.10485670
-- scikit-learn, documentation for `EllipticEnvelope` and robust covariance: https://scikit-learn.org/stable/modules/generated/sklearn.covariance.EllipticEnvelope.html
