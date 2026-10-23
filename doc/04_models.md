@@ -11,11 +11,9 @@ that independent univariate baselines may not identify.
 
 ### Principle
 
-The method builds an ensemble of isolation trees. Each tree repeatedly selects a feature and a split value at random, partitioning the observations until a window is isolated or a stopping condition is reached. An observation isolated
-in fewer splits than typical observations is considered more anomalous.
+The method builds an ensemble of isolation trees. Each tree repeatedly **selects a feature and a split value** (between the min and max of that feature) at random, partitioning the observations until a window is isolated or a stopping condition is reached. An observation isolated in fewer splits than typical observations is considered more anomalous.
 
-The anomaly score is based on the average path length across the trees: shorter average paths indicate greater anomaly. Implementations may expose scores with different signs or conventions. For comparisons in this project, the reported
-`anomaly_score` must consistently increase with anomaly.
+The anomaly score is based on the **average path length across the trees**: shorter average paths indicate greater anomaly. Implementations may expose scores with different signs or conventions. For comparisons in this project, the reported `anomaly_score` must consistently increase with anomaly.
 
 ### Proposed application to this project
 
@@ -25,18 +23,14 @@ The anomaly score is based on the average path length across the trees: shorter 
 - Fit the model on the chronological reference period only. Score the later evaluation period without refitting on it.
 - Return one anomaly score per evaluation window and a binary decision derived from a threshold calibrated using the reference period only.
 
-### Parameters to evaluate
+### Parameters to evaluate (from sklearn.sklearn.ensemble.IsolationForest)
 
 The experiment should record the selected values and rationale for:
 
-- **Number of trees:** controls ensemble size and computational cost.
+- **n_estimators**: Number of trees (more = better, slower)
+- **contamination**:(helps calibrate threshold) Expected % of anomalies -- % unkonwn with unlabled data 
+- **max_samples**: # of samples used per tree (default = 'auto')
 - **Subsample size:** controls the number of observations considered by each
-  tree and can affect sensitivity to rare patterns.
-- **Feature sampling:** controls how many features are considered when building
-  trees.
-- **Expected anomaly fraction or decision threshold:** determines how scores
-  become anomaly decisions. It must be chosen without using evaluation-period
-  outcomes.
 - **Random seed:** should be fixed for reproducibility
 
 
