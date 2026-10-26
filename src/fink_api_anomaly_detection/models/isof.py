@@ -106,17 +106,3 @@ class IsolationForestDetector:
             raise FileNotFoundError(f"No saved detector found at {source}")
 
         return joblib.load(source)
-
-
-def evaluate_contamination(X: pd.DataFrame,contamination_values: list[float],random_state: int = 42) -> pd.DataFrame:
-    """Compare anomaly counts and scores across contamination settings."""
-    NotImplementedError("This function is a placeholder and needs to be implemented.")
-
-
-def evaluate_stability(X: pd.DataFrame, detector_params: dict[str, Any], random_states: list[int]) -> pd.DataFrame:
-    """Evaluate the stability of anomaly predictions across random seeds."""
-    NotImplementedError("This function is a placeholder and needs to be implemented.")
-
-def compare_predictions(predictions: dict[str, pd.Series],) -> pd.DataFrame:
-    """Compare anomaly predictions using pairwise overlap and Jaccard similarity."""
-    NotImplementedError("This function is a placeholder and needs to be implemented.")
