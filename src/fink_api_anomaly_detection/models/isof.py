@@ -2,7 +2,9 @@
 
 from typing import Any
 from pathlib import Path
+import inspect
 import joblib
+from datetime import datetime, timezone
 
 import pandas as pd
 from sklearn.ensemble import IsolationForest
@@ -30,6 +32,8 @@ class IsolationForestDetector:
         )
         self.is_fitted_ = False
         self.feature_names_: list[str] = []
+        self.metadata_ = None 
+        self.n_samples_fit_ = None 
 
     def fit(self, X: pd.DataFrame) -> "IsolationForestDetector":
         """Fit Isolation Forest on numerical features extracted from log windows"""
@@ -37,6 +41,7 @@ class IsolationForestDetector:
         self.feature_names_ = list(X.columns)
         self.model.fit(X)
         self.is_fitted_ = True
+        self.n_samples_fit_ = X.shape[0]
 
         return self
 
@@ -84,25 +89,57 @@ class IsolationForestDetector:
         self.model.set_params(**params)
         self.feature_names_ = None
         self.is_fitted_ = False
+        self.n_samples_fit_ = None
 
         return self
 
-
-    def save(self, path: str) -> None:
-        """Persist the fitted detector to disk."""
+    def save(self, path: str | Path) -> None:
+        """Save the fitted model and its metadata to disk."""
         if not self.is_fitted_:
-            raise RuntimeError("The detector must be fitted before making predictions.")
+            raise RuntimeError("The detector must be fitted before saving.")
 
         destination = Path(path)
         destination.parent.mkdir(parents=True, exist_ok=True)
 
-        joblib.dump(self, destination)
+        artifact = {
+            "model": self.model,
+            "is_fitted": self.is_fitted_,
+            "feature_names": self.feature_names_,
+            "hyperparameters": self.get_params(),
+            "n_features": len(self.feature_names_),
+            "n_training_samples": int(self.n_samples_fit_),
+            "training_date_utc": datetime.now(timezone.utc).isoformat(),
+        }
+
+        joblib.dump(artifact, destination)
+
 
     @classmethod
-    def load(cls, path: str) -> "IsolationForestDetector":
-        """Load a previously saved detector from disk."""
+    def load(cls, path: str | Path) -> "IsolationForestDetector":
+        """Load the fitted model and its metadata from disk."""
         source = Path(path)
         if not source.exists():
             raise FileNotFoundError(f"No saved detector found at {source}")
 
-        return joblib.load(source)
+        artifact = joblib.load(source)
+
+        signature = inspect.signature(cls.__init__)
+        valid_params = set(signature.parameters) - {"self"}
+
+        hyperparameters = {
+            key: value
+            for key, value in artifact["hyperparameters"].items()
+            if key in valid_params
+        }
+
+        detector = cls(**hyperparameters)
+        detector.model = artifact["model"]
+        detector.is_fitted_ = artifact["is_fitted"]
+        detector.feature_names_ = artifact["feature_names"]
+        detector.metadata_ = {
+            key: value
+            for key, value in artifact.items()
+            if key not in {"model", "is_fitted", "feature_names"}
+        }
+
+        return detector
