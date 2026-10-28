@@ -15,7 +15,7 @@ The `doc/` directory documents the problem definition, available data, and model
 - [Data Description](doc/01_data.md) : Describes the available logs, potential data sources, and limitations in term of data.
 - [Feature Engineering Strategy](doc/02_feature_engineering_strategy.md) : Feature Engineering Strategy (doc) for Fink API anomaly detection and forecasting.
 - [Baselines definition](doc/03_baselines.md) : Defines the statistical baselines for anomaly detection.
-- [Candidate machine-learning models](doc/04_models.md): describes candidate ml models to compare with the statistical baselines.
+- [Candidate machine/deep-learning models](doc/04_models.md): describes candidate ml/dl models to compare with the statistical baselines.
 
 ---
 
