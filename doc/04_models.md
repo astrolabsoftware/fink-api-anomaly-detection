@@ -180,6 +180,9 @@ Record the selected values and rationale for:
   seasonality.
 
 
+### implementation in python
+Autoencoders are deep learning models, making **Keras and PyTorch** the industry standards and best choices for building them. While **Keras** offers a **fast and user-friendly API perfect for standard architectures**, **PyTorch provides total flexibility and control** for complex or research-oriented models. In contrast, Scikit-Learn is not designed for deep networks .
+
 ---
 
 # References 
