@@ -25,6 +25,10 @@ The [notebooks/](notebooks/) follow the methodology described gradually in the p
 
 ---
 
+## setup 
+
+requires-python = ">=3.13,<3.14"
+
 ## Project Status
 
-Research & development - baseline (refs model) development
+Research & development - think about an app to deploy (OR api) for inference
