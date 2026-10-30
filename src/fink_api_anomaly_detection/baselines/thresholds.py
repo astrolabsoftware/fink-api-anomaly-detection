@@ -42,7 +42,7 @@ class OperationalThresholds:
 
 
 class OperationalThresholdBaseline:
-    """Score timestamped feature data using explicit operational thresholds"""
+    """Score feature data using explicit operational thresholds."""
 
     _FEATURE_COLUMNS = (
         "http_5xx_rate",
@@ -50,25 +50,22 @@ class OperationalThresholdBaseline:
         "request_count",
         "nginx_error_count",
     )
-    _REQUIRED_COLUMNS = ("timestamp", *_FEATURE_COLUMNS)
-
     def __init__(self, thresholds: OperationalThresholds) -> None:
         if not isinstance(thresholds, OperationalThresholds):
             raise TypeError("thresholds must be an OperationalThresholds instance.")
         self.thresholds = thresholds
 
     def score(self, data_df: pd.DataFrame) -> pd.DataFrame:
-        """Return each timestamp and the count of thresholds exceeded."""
+        """Return each index and the count of thresholds exceeded."""
 
         if data_df.empty:
             return pd.DataFrame(
                 {
-                    "timestamp": data_df["timestamp"].reset_index(drop=True),
-                    "anomaly_score": pd.Series(dtype="float64"),
+                    "anomaly_score": pd.Series(index=data_df.index, dtype="float64"),
                 }
             )
 
-        data = data_df.loc[:, self._REQUIRED_COLUMNS].reset_index(drop=True)
+        data = data_df.loc[:, self._FEATURE_COLUMNS]
         triggered_rules = pd.DataFrame(
             {
                 "high_http_5xx_rate": (
@@ -88,15 +85,13 @@ class OperationalThresholdBaseline:
 
         return pd.DataFrame(
             {
-                "timestamp": data["timestamp"],
                 "anomaly_score": triggered_rules.sum(axis=1).astype("float64"),
             }
         )
 
     def predict(self, data_df: pd.DataFrame) -> pd.DataFrame:
-        """Return timestamps, threshold-exceedance scores, and anomaly decisions."""
+        """Return threshold-exceedance scores and decisions, indexed like the input."""
 
         result = self.score(data_df)
         result["is_anomaly"] = result["anomaly_score"] > 0
-        return result[["timestamp", "anomaly_score", "is_anomaly"]]
-
+        return result[["anomaly_score", "is_anomaly"]]
