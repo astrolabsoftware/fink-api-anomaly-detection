@@ -62,7 +62,6 @@ class ClassicalZScoreBaseline:
             
         return pd.DataFrame(
             {
-                "timestamp": data["timestamp"].reset_index(drop=True),
                 "anomaly_score": scores.reset_index(drop=True).astype("float64"),
             }
         )
@@ -71,4 +70,4 @@ class ClassicalZScoreBaseline:
         """Return timestamps, absolute Z-scores, and threshold decisions."""
         result = self.score(data_df)
         result["is_anomaly"] = result["anomaly_score"] > self.threshold
-        return result[["timestamp", "anomaly_score", "is_anomaly"]]
+        return result[[ "anomaly_score", "is_anomaly"]]
