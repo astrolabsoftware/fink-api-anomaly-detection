@@ -31,4 +31,4 @@ requires-python = ">=3.13,<3.14"
 
 ## Project Status
 
-Research & development - think about an app to deploy (OR api) for inference
+Research & development - think about an app to deploy (FastApi OR api) for inference

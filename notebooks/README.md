@@ -9,7 +9,7 @@ In the notebooks in this folder, we aim to explore the data, perform analyses, d
 - [03 - Feature Engineering](03_feature_enginering.ipynb): Parse the three Nginx log sources, build and validate the 5-minute temporal features, and prepare the experiment feature subsets.
 - [04 - Baselines evaluation](04_baselines_evaluation.ipynb): Here we test some baselines (statistical methods) for anomaly detections .
 - [05 - Isolation forest model evaluation](05_isoforest_model.ipynb): Here we test a ML Model: Isolation forest for anomaly detections .
-
+- [06 - deep learning model evaluation](06_isoforest_model.ipynb): autoencoder-based anomaly detection.
 
 ## Setup - Quick Steps to use a venv with Jupyter Notebook
 
