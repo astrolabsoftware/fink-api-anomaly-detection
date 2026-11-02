@@ -10,6 +10,7 @@ In the notebooks in this folder, we aim to explore the data, perform analyses, d
 - [04 - Baselines evaluation](04_baselines_evaluation.ipynb): Here we test some baselines (statistical methods) for anomaly detections .
 - [05 - Isolation forest model evaluation](05_isoforest_model.ipynb): Here we test a ML Model: Isolation forest for anomaly detections .
 - [06 - deep learning model evaluation](06_autoencoder_model.ipynb): autoencoder-based anomaly detection.
+- [07 - Autoencoder inference](07_autoencoder_inference_test.ipynb): Run inference with the trained autoencoder.
 
 ## Setup - Quick Steps to use a venv with Jupyter Notebook
 
@@ -35,5 +36,4 @@ In the notebooks in this folder, we aim to explore the data, perform analyses, d
 5. **Select the kernel in Jupyter**
    - Open your `.ipynb` notebook
    - Go to **Kernel > Change kernel** and select `venv`
-
 
