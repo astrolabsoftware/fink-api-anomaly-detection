@@ -52,26 +52,43 @@ def build_geo_dataframe(log_files: Iterable[str | Path],) -> pd.DataFrame:
     Invalid lines are skipped and recorded in DataFrame attributes.
     Source file and line number are preserved for traceability.
     """
+    def file_lines() -> Iterable[tuple[str, int, str]]:
+        for log_file in log_files:
+            path = Path(log_file)
+            for line_number, line in iter_log_lines(path):
+                yield path.name, line_number, line
+
+    return _build_geo_dataframe(file_lines())
+
+
+def build_geo_dataframe_from_lines(lines: Iterable[str]) -> pd.DataFrame:
+    """Build the canonical geo-log DataFrame from raw request-window lines."""
+    return _build_geo_dataframe(
+        ("window-payload", line_number, line)
+        for line_number, line in enumerate(lines, start=1)
+    )
+
+
+def _build_geo_dataframe(
+    lines: Iterable[tuple[str, int, str]],
+) -> pd.DataFrame:
     records = []
     invalid_lines = []
 
-    for log_file in log_files:
-        path = Path(log_file)
+    for source_file, line_number, line in lines:
+        if not line.strip():
+            invalid_lines.append({"source_file": source_file,"source_line_number": line_number,"reason": "empty_line",})
+            continue
 
-        for line_number, line in iter_log_lines(path):
-            if not line.strip():
-                invalid_lines.append({"source_file": path.name,"source_line_number": line_number,"reason": "empty_line",})
-                continue
+        parsed = parse_geo_log_line(line)
 
-            parsed = parse_geo_log_line(line)
+        if parsed is None:
+            invalid_lines.append({"source_file": source_file,"source_line_number": line_number,"reason": "unrecognized_format",})
+            continue
 
-            if parsed is None:
-                invalid_lines.append({"source_file": path.name,"source_line_number": line_number,"reason": "unrecognized_format",})
-                continue
-
-            parsed["source_file"] = path.name
-            parsed["source_line_number"] = line_number
-            records.append(parsed)
+        parsed["source_file"] = source_file
+        parsed["source_line_number"] = line_number
+        records.append(parsed)
 
     columns = ["timestamp","country","status_code","endpoint","source_file","source_line_number",]
 

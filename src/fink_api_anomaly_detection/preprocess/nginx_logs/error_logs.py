@@ -154,26 +154,43 @@ def build_error_dataframe(log_files: Iterable[str | Path],) -> pd.DataFrame:
     Invalid lines are skipped and recorded in DataFrame attributes.
     Source file and line number are preserved for traceability.
     """
+    def file_lines() -> Iterable[tuple[str, int, str]]:
+        for log_file in log_files:
+            path = Path(log_file)
+            for line_number, line in iter_log_lines(path):
+                yield path.name, line_number, line
+
+    return _build_error_dataframe(file_lines())
+
+
+def build_error_dataframe_from_lines(lines: Iterable[str]) -> pd.DataFrame:
+    """Build the canonical error-log DataFrame from raw request-window lines."""
+    return _build_error_dataframe(
+        ("window-payload", line_number, line)
+        for line_number, line in enumerate(lines, start=1)
+    )
+
+
+def _build_error_dataframe(
+    lines: Iterable[tuple[str, int, str]],
+) -> pd.DataFrame:
     records = []
     invalid_lines = []
 
-    for log_file in log_files:
-        path = Path(log_file)
+    for source_file, line_number, line in lines:
+        if not line.strip():
+            invalid_lines.append({"source_file": source_file,"source_line_number": line_number,"reason": "empty_line",})
+            continue
 
-        for line_number, line in iter_log_lines(path):
-            if not line.strip():
-                invalid_lines.append({"source_file": path.name,"source_line_number": line_number,"reason": "empty_line",})
-                continue
+        parsed = parse_error_log_line(line)
 
-            parsed = parse_error_log_line(line)
+        if parsed is None:
+            invalid_lines.append({"source_file": source_file,"source_line_number": line_number,"reason": "unrecognized_format",})
+            continue
 
-            if parsed is None:
-                invalid_lines.append({"source_file": path.name,"source_line_number": line_number,"reason": "unrecognized_format",})
-                continue
-
-            parsed["source_file"] = path.name
-            parsed["source_line_number"] = line_number
-            records.append(parsed)
+        parsed["source_file"] = source_file
+        parsed["source_line_number"] = line_number
+        records.append(parsed)
 
     columns = ["timestamp","error_level","worker_pid","worker_tid","connection_id","error_message","error_code","error_description","client_ip","server","method","endpoint","protocol","upstream","host","source_file","source_line_number"]
 
@@ -190,4 +207,3 @@ def build_error_dataframe(log_files: Iterable[str | Path],) -> pd.DataFrame:
     df.attrs["parsed_line_count"] = len(records)
 
     return df
-
