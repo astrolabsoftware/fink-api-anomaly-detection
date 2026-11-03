@@ -1,6 +1,13 @@
 # Data
 /data/
 
+# Logs Client
+/client/state/*.json
+/client/state/*.jsonl
+/client/state/pending/*.json
+/client/logs/*.log
+/.env
+
 # Python
 __pycache__/
 *.py[cod]
