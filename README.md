@@ -42,29 +42,6 @@ The inference server exposes exactly two application routes:
 - `GET /health`: unauthenticated liveness check.
 - `POST /predict`: accepts one complete 5-minute raw log window and requires the `X-API-Token` header.
 
-## There is 2 setup mode (manual and docker):
-
-### Setup (Manual)
-
-On the inference host, install only the runtime dependencies and configure the root `.env` file.
-
-The repository includes a `.env.example` file containing the default configuration. Copy it to `.env` and replace the example `API_TOKEN` with a strong secret before starting the server.
-
-The `.env` file is ignored by Git, while `.env.example` serves as a configuration template.
-
-```bash
-python -m pip install -r requirements.api.txt
-
-cp .env.example .env
-
-# Edit .env and set API_TOKEN (and optionally SLACK_WEBHOOK_URL).
-
-python -m uvicorn fink_api_anomaly_detection.api:app \
-    --app-dir src \
-    --env-file .env \
-    --host 0.0.0.0 \
-    --port 8000
-```
 
 ### Server configuration
 
@@ -74,14 +51,53 @@ The following environment variables configure the inference server (in .env):
 |---|---|---|
 | `AE_MODEL_PATH` | `artifacts/ae` | Path to the trained Autoencoder and scaler. |
 | `ANOMALY_THRESHOLD` | `0.3608` | Reconstruction error threshold used for anomaly detection. |
-| `API_TOKEN` | Required | Shared secret used to authenticate client requests. |
-| `SLACK_WEBHOOK_URL` | Empty | Optional Slack webhook URL used for anomaly notifications. |
+| `API_TOKEN` | Required (Raplace <YOUR_API_TOKEN>) | Shared secret used to authenticate client requests. |
+| `SLACK_WEBHOOK_URL` | optionall (Replace <YOUR_SLACK_WEBHOOK_URL>) | Optional Slack webhook URL used for anomaly notifications. |
+
+
+The repository includes a `.env.example` file containing the default configuration. Copy it to `.env` and replace the example `API_TOKEN` with a strong secret before starting the server.
+
+The `.env` file is ignored by Git and excluded from the Docker build context. `.env.example` is only a configuration template; it is not loaded by the application.
+
+```bash 
+cp .env.example .env
+```
+Then Edit .env and set API_TOKEN (and optionally SLACK_WEBHOOK_URL).
+
+## There is 2 setup mode (manual and docker):
+
+### Setup (Manual)
+
+On the inference host, install only the runtime dependencies and configure the root `.env` file.
+
+```bash
+python -m venv venv 
+source venv/bin/activate 
+python -m pip install -r requirements.api.txt
+
+python -m uvicorn fink_api_anomaly_detection.api:app  --app-dir src --env-file .env --host 0.0.0.0 --port 8000
+```
+
 
 ### Setup (Docker)
 
-*Docker deployment : coming soon.*
+To pull and run the published image from Docker Hub, first configure `.env` as described above, then run:
 
-## Example execution
+```bash
+docker compose -f docker-compose.api.yml up
+```
+
+Compose pulls `massmach/ztf.api.fink-portal.log-anomaly-detection:latest`
+
+Stop the service with `Ctrl+C`, then remove its container with:
+
+```bash
+docker compose -f docker-compose.api.yml down
+```
+
+To build the image locally instead, use `docker build -f Dockerfile.api -t fink-api-anomaly-detection .`.
+
+## Example API execution
 
 ### Accessing the API documentation
 

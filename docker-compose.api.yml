@@ -1,0 +1,9 @@
+services:
+  anomaly-detection-api:
+    image: massmach/ztf.api.fink-portal.log-anomaly-detection:latest
+    pull_policy: always
+    restart: unless-stopped  
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
