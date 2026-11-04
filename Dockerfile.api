@@ -19,7 +19,8 @@ RUN python -m venv /venv && \
         "msgpack>=1.2.3" \
         "setuptools>=78.1.1" \
         "urllib3>=2.8.0" && \
-    /venv/bin/pip check
+    /venv/bin/pip check && \
+    /venv/bin/python -m pip show msgpack setuptools urllib3
 
 
 FROM python:3.13-slim AS runtime
