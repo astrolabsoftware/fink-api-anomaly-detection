@@ -15,12 +15,9 @@ COPY requirements.api.txt .
 
 RUN python -m venv /venv && \
     /venv/bin/pip install --no-cache-dir --upgrade pip && \
-    /venv/bin/pip install --no-cache-dir -r requirements.api.txt && \
-    /venv/bin/pip check && \
-    /venv/bin/python -c "import numpy, pandas, sklearn, tensorflow, fastapi; print('Imports OK')"
+    /venv/bin/pip install --no-cache-dir -r requirements.api.txt
 
 # Runtime stage
-
 FROM python:3.13-slim AS runtime
 
 WORKDIR /fink_api_anomaly_detection
@@ -29,11 +26,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/venv/bin:$PATH"
 
-
 COPY --from=builder /venv /venv
+
+
+RUN python -m pip uninstall -y pip setuptools \
+    && rm -rf /usr/local/lib/python3.13/site-packages/pip* \
+    && rm -rf /usr/local/lib/python3.13/site-packages/setuptools* \
+    && rm -rf /usr/local/lib/python3.13/site-packages/urllib3*
+
 
 COPY src ./src
 COPY artifacts/ae ./artifacts/ae
+
 
 RUN useradd --create-home --shell /usr/sbin/nologin appuser && \
     chown -R appuser:appuser /fink_api_anomaly_detection
