@@ -14,14 +14,8 @@ COPY requirements.api.txt .
 
 RUN python -m venv /venv && \
     /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install --no-cache-dir -r requirements.api.txt && \
-    /venv/bin/pip install --no-cache-dir --upgrade \
-        "msgpack>=1.2.3,<2" \
-        "setuptools>=78.1.1" \
-        "urllib3>=2.8.0,<3" && \
-    /venv/bin/pip check && \
-    /venv/bin/pip show msgpack setuptools urllib3
-
+    /venv/bin/pip install --no-cache-dir -r requirements.api.txt
+    
 FROM python:3.13-slim AS runtime
 
 WORKDIR /fink_api_anomaly_detection

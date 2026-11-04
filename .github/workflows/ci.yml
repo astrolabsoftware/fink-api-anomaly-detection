@@ -28,11 +28,11 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build \
+          docker build --pull --no-cache \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }} \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:latest \
             -f Dockerfile.api .
-
+            
       - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@v0.36.0
         with:
