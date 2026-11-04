@@ -426,7 +426,7 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
 
         if non_france_share is not None and non_france_share > 0 and country is not None:
             geography_lines.append(
-                f"• Share of non-France traffic: *{non_france_share:.0%}*"
+                f"• Share of {country} traffic from non-France (foreign) traffic: *{non_france_share:.0%}*"
             )
             if is_anomaly and non_france_share == 1.0:
                 geography_lines.append(
