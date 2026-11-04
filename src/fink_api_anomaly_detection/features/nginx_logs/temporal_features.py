@@ -51,13 +51,13 @@ def build_temporal_features(access_df: pd.DataFrame, geo_df: pd.DataFrame, error
     for features in (access_features, geo_features, error_features):
         result = result.merge(features,on="timestamp",how="left",validate="one_to_one")
 
+    rate_features = ["http_4xx_rate","http_5xx_rate","top_country_share","top_country_share_without_france"]
     count_features = [
         feature
         for feature in ALL_FEATURES
-        if not feature.endswith(("_rate", "_share", "_delta"))
+        if feature not in rate_features and not feature.endswith("_delta")
     ]
     result[count_features] = result[count_features].fillna(0).astype("int64")
-    rate_features = ["http_4xx_rate","http_5xx_rate","top_country_share","top_country_share_without_france"]
     result[rate_features] = result[rate_features].fillna(0.0)
 
     result["request_count_delta"] = result["request_count"].diff().fillna(0)

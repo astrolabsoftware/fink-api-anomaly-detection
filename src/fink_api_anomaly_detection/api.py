@@ -144,7 +144,10 @@ def _read_log_frames(window: LogWindow) -> tuple[pd.DataFrame, pd.DataFrame, pd.
             warnings.append(warning)
             LOGGER.warning("%s", warning)
 
-        valid_frames.append(frame.loc[in_window].copy())
+        filtered = frame.loc[in_window].copy()
+        filtered.attrs["out_of_window_line_count"] = int((~in_window).sum())
+        filtered.attrs["parsed_line_count"] = len(filtered)
+        valid_frames.append(filtered)
 
     return valid_frames[0], valid_frames[1], valid_frames[2], warnings
 
@@ -156,6 +159,14 @@ def _build_summary_labels(access_df: pd.DataFrame, geo_df: pd.DataFrame ) -> dic
         "top_non_france_country": None,
         "top_unrecognized_endpoint": None,
         "top_unrecognized_endpoint_count": 0,
+        "geo_entry_count": len(geo_df),
+        "geo_input_line_count": int(geo_df.attrs.get("input_line_count", len(geo_df))),
+        "geo_invalid_line_count": int(geo_df.attrs.get("invalid_line_count", 0)),
+        "geo_out_of_window_line_count": int(geo_df.attrs.get("out_of_window_line_count", 0)),
+        "geo_valid_country_count": 0,
+        "geo_foreign_entry_count": 0,
+        "geo_foreign_share": None,
+        "geo_unique_country_count": 0,
     }
 
     if not access_df.empty:
@@ -169,10 +180,24 @@ def _build_summary_labels(access_df: pd.DataFrame, geo_df: pd.DataFrame ) -> dic
 
     if not geo_df.empty:
         countries = geo_df["country"].astype("string").str.strip()
-        countries = countries.mask(countries.isna() | countries.eq("") | countries.eq("-"))
-        non_france = countries.loc[countries.notna() & ~countries.str.casefold().eq("france")]
+        country_keys = countries.str.casefold()
+        valid = countries.notna() & countries.ne("") & countries.ne("-")
+        valid_countries = countries.loc[valid]
+        valid_keys = country_keys.loc[valid]
+        non_france = valid_keys.loc[valid_keys.ne("france")]
+
+        labels["geo_valid_country_count"] = len(valid_countries)
+        labels["geo_foreign_entry_count"] = len(non_france)
+        labels["geo_unique_country_count"] = int(valid_keys.nunique())
+        if len(valid_countries):
+            labels["geo_foreign_share"] = len(non_france) / len(valid_countries)
+
         if not non_france.empty:
-            labels["top_non_france_country"] = str(non_france.value_counts().index[0])
+            country_counts = non_france.value_counts()
+            top_country_key = country_counts.index[0]
+            labels["top_non_france_country"] = str(
+                valid_countries.loc[valid_keys.eq(top_country_key)].iloc[0]
+            )
 
     return labels
 
@@ -334,35 +359,86 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
         {"type": "divider"},
     ])
 
-    non_france_share = float(
-        features["top_country_share_without_france"]
-    )
+    raw_non_france_share = features.get("top_country_share_without_france")
+    non_france_share: float | None = None
+    if raw_non_france_share is not None:
+        try:
+            candidate_share = float(raw_non_france_share)
+        except (TypeError, ValueError):
+            candidate_share = math.nan
+        if math.isfinite(candidate_share) and 0 <= candidate_share <= 1:
+            non_france_share = candidate_share
 
-    country = labels["top_non_france_country"]
+    geo_entry_count = int(labels.get("geo_entry_count", 0))
+    valid_country_count = int(labels.get("geo_valid_country_count", 0))
+    foreign_entry_count = int(labels.get("geo_foreign_entry_count", 0))
+    country = labels.get("top_non_france_country")
 
     geography_lines = ["*🌍 Geography*"]
 
-    if country is not None and non_france_share > 0:
-
-        geography_lines.append(
-            f"• Traffic - Top country outside France: *{country}*"
-        )
-
-        geography_lines.append(
-            f"• Share of non-France traffic: *{non_france_share:.0%}*"
-        )
-
-        if is_anomaly and non_france_share == 1.0:
+    if geo_entry_count == 0:
+        input_line_count = int(labels.get("geo_input_line_count", 0))
+        invalid_line_count = int(labels.get("geo_invalid_line_count", 0))
+        out_of_window_count = int(labels.get("geo_out_of_window_line_count", 0))
+        if out_of_window_count:
             geography_lines.append(
-                "⚠️ All observed requests outside France "
-                f"came from one country ({country}). This alone is not evidence "
-                "of a datacenter or scan."
+                "• No valid geographic entries were in this window; "
+                f"{out_of_window_count} parsed line(s) were outside it."
+            )
+        elif input_line_count == 0:
+            geography_lines.append(
+                "• No geographic entries were received; foreign traffic cannot be determined."
+            )
+        elif invalid_line_count:
+            geography_lines.append(
+                "• Geographic lines were received, but none could be parsed; "
+                "foreign traffic cannot be determined."
+            )
+        else:
+            geography_lines.append(
+                "• No valid geographic entries were available for this window; "
+                "foreign traffic cannot be determined."
+            )
+    elif valid_country_count == 0:
+        entry_text = (
+            "1 geographic entry was"
+            if geo_entry_count == 1
+            else f"{geo_entry_count} geographic entries were"
+        )
+        geography_lines.append(
+            f"• {entry_text} received, "
+            "but none had a valid country; foreign traffic cannot be determined."
+        )
+    elif foreign_entry_count == 0:
+        geography_lines.append(
+            "• No traffic outside France was observed among "
+            f"{valid_country_count} entries with valid countries."
+        )
+    else:
+        if country is not None:
+            geography_lines.append(
+                f"• Traffic - Top country outside France: *{country}*"
+            )
+        else:
+            geography_lines.append(
+                "• Foreign traffic was present, but its leading country is unavailable."
             )
 
-    else:
-        geography_lines.append(
-            "• No traffic outside France was observed."
-        )
+        if non_france_share is not None and non_france_share > 0 and country is not None:
+            geography_lines.append(
+                f"• Share of non-France traffic: *{non_france_share:.0%}*"
+            )
+            if is_anomaly and non_france_share == 1.0:
+                geography_lines.append(
+                    "⚠️ All observed requests outside France "
+                    f"came from one country ({country}). This alone is not evidence "
+                    "of a datacenter or scan."
+                )
+        else:
+            geography_lines.append(
+                "• The top-country share among foreign entries is unavailable "
+                "or inconsistent with the parsed geographic records."
+            )
 
     blocks.append({
         "type": "section",

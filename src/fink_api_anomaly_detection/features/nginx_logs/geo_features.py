@@ -13,7 +13,10 @@ def build_geo_features(geo_df: pd.DataFrame) -> pd.DataFrame:
     if frame.empty: return empty_aggregate(GEO_FEATURES)
 
     countries = frame["country"].astype("string").str.strip()
-    frame["_country"] = countries.mask(countries.isna() | countries.eq("") | countries.eq("-"))
+    country_keys = countries.str.casefold()
+    frame["_country"] = country_keys.mask(
+        countries.isna() | countries.eq("") | countries.eq("-")
+    )
 
     valid_countries = frame.loc[frame["_country"].notna()]
 
@@ -33,7 +36,7 @@ def build_geo_features(geo_df: pd.DataFrame) -> pd.DataFrame:
             }
         )
 
-        non_france = valid_countries.loc[~valid_countries["_country"].str.casefold().eq("france")]
+        non_france = valid_countries.loc[~valid_countries["_country"].eq("france")]
         non_france_counts = non_france.groupby(["timestamp", "_country"], sort=True).size()
         non_france_by_window = non_france_counts.groupby(level="timestamp")
         result["top_country_share_without_france"] = (non_france_by_window.max() / non_france_by_window.sum())

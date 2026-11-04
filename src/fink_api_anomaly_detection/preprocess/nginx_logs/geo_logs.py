@@ -101,5 +101,6 @@ def _build_geo_dataframe(
     df.attrs["invalid_lines"] = invalid_lines
     df.attrs["invalid_line_count"] = len(invalid_lines)
     df.attrs["parsed_line_count"] = len(records)
+    df.attrs["input_line_count"] = len(records) + len(invalid_lines)
 
     return df
