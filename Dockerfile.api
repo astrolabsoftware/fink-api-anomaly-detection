@@ -1,4 +1,5 @@
-# Multi-stage build
+# Multi-stage Dockerfile
+# Builder stage
 FROM python:3.13-slim AS builder
 
 WORKDIR /app
@@ -13,15 +14,12 @@ RUN apt-get update && \
 COPY requirements.api.txt .
 
 RUN python -m venv /venv && \
-    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install --no-cache-dir --upgrade pip && \
     /venv/bin/pip install --no-cache-dir -r requirements.api.txt && \
-    /venv/bin/pip install --no-cache-dir --upgrade \
-        "msgpack>=1.2.3" \
-        "setuptools>=78.1.1" \
-        "urllib3>=2.8.0" && \
     /venv/bin/pip check && \
-    /venv/bin/python -m pip show msgpack setuptools urllib3
+    /venv/bin/python -c "import numpy, pandas, sklearn, tensorflow, fastapi; print('Imports OK')"
 
+# Runtime stage
 
 FROM python:3.13-slim AS runtime
 
@@ -31,10 +29,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/venv/bin:$PATH"
 
+
 COPY --from=builder /venv /venv
 
 COPY src ./src
 COPY artifacts/ae ./artifacts/ae
+
+RUN useradd --create-home --shell /usr/sbin/nologin appuser && \
+    chown -R appuser:appuser /fink_api_anomaly_detection
+
+USER appuser
 
 EXPOSE 8000
 

@@ -3,10 +3,12 @@ pandas==2.3.3
 scikit-learn==1.7.2
 joblib==1.5.2
 tensorflow==2.20.0
+
 fastapi>=0.115,<1
 pydantic>=2.7,<3
 uvicorn>=0.34,<1
 python-dotenv>=1.0,<2
+
 msgpack>=1.2.3,<2
-setuptools>=78.1.1
+setuptools>=78.1.1,<100
 urllib3>=2.8.0,<3

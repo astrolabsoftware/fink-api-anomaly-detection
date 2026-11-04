@@ -33,18 +33,6 @@ jobs:
             -t ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:latest \
             -f Dockerfile.api .
 
-      - name: Verify installed Python package versions
-        run: |
-          docker run --rm --entrypoint python \
-            ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }} \
-            -c "from importlib.metadata import version; from packaging.version import Version; expected = {'msgpack': '1.2.3', 'setuptools': '78.1.1', 'urllib3': '2.8.0'}; actual = {name: version(name) for name in expected}; print(actual); assert all(Version(actual[name]) >= Version(minimum) for name, minimum in expected.items()), actual"
-
-      - name: List bundled Python wheel SBOMs
-        run: |
-          docker run --rm --entrypoint sh \
-            ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }} \
-            -c "find /venv -type f -path '*/.dist-info/sboms/*' -print"
-
       - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -55,8 +43,7 @@ jobs:
           ignore-unfixed: true
           vuln-type: os,library
           severity: CRITICAL,HIGH
-          skip-files: '**/*.dist-info/sboms/*.cdx,**/*.dist-info/sboms/*.cdx.json,**/*.dist-info/sboms/*.spdx,**/*.dist-info/sboms/*.spdx.json'
-
+          
       - name: Log in to DockerHub Container Registry
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
