@@ -13,7 +13,7 @@ RUN apt-get update && \
 COPY requirements.api.txt .
 
 RUN python -m venv /venv && \
-    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install --upgrade pip setuptools msgpack urllib3 && \
     /venv/bin/pip install -r requirements.api.txt
 
 FROM python:3.13-slim AS runtime
