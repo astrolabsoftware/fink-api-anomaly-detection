@@ -1,0 +1,57 @@
+
+name: Build and Push Anomaly Detection API image to DockerHub
+
+on:
+  # Build and publish the image when its sources change on main on pathes 
+  # src/**, artifacts/**, Dockerfile.api, .dockerignore, .env.example, requirements.api.txt, and .github/workflows/ci.yml
+  push:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile.api'
+      - '.dockerignore'
+      - '.env.example'
+      - 'src/**'
+      - 'artifacts/**'
+      - 'requirements.api.txt'
+      - '.github/workflows/ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }} \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:latest \
+            -f Dockerfile.api .
+
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          version: v0.76.1
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }}
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+
+      - name: Log in to DockerHub Container Registry
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+      - name: Push Docker image to DockerHub
+        run: |
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }}
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:latest
