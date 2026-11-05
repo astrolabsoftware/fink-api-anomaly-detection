@@ -1,0 +1,22 @@
+[Unit]
+Description=Lightweight Nginx log exporter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nginx-log-exporter
+Group=nginx-log-exporter
+SupplementaryGroups=adm
+WorkingDirectory=/opt/nginx-log-exporter
+ExecStart=/usr/bin/python3 /opt/nginx-log-exporter/nginx_log_exporter.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/var/log/nginx
+
+[Install]
+WantedBy=multi-user.target

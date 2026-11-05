@@ -1,0 +1,11 @@
+{
+  "source_id": "nginx.log.ztf.api.fink-portal",
+  "api_url": "https://YOUR_INFERENCE_SERVER/predict",
+  "api_token": "CHANGE_ME",
+  "log_files": {
+    "access_logs": "/var/log/nginx/access.log",
+    "geo_logs": "/var/log/nginx/geo.log",
+    "error_logs": "/var/log/nginx/error.log"
+  },
+  "request_timeout_seconds": 10
+  }
