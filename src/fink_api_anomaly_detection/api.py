@@ -634,6 +634,7 @@ def create_app( service: InferenceService | None = None, api_token: str | None =
     application = FastAPI(
         title="API Fink - Nginx Log Anomaly Detection API (Autoencoder)",
         version="0.3.0",
+        root_path=os.getenv("API_ROOT_PATH", ""),
         lifespan=lifespan,
     )
 
