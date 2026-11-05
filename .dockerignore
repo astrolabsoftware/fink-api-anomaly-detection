@@ -1,4 +1,5 @@
-.env
+.env.lsst
+.env.ztf
 .env.*
 !.env.example
 .git

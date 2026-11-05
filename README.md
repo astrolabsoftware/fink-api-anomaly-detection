@@ -68,7 +68,7 @@ Edit `.env.ztf` and replace `API_TOKEN` (and, if needed, set
 not load them directly.
 
 The Compose file starts only the ZTF service by default. It pulls
-`massmach/api.fink-portal.log-anomaly-detection:latest`, maps host port 8000 to
+`gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api`, maps host port 8000 to
 container port 8000, and reads `.env.ztf`.
 
 ```bash
