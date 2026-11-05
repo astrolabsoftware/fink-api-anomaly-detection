@@ -1,0 +1,19 @@
+# Copy to config.lsst, then set the real values.
+
+NAMESPACE='fink-api-anomaly-detection'
+DOMAIN='api.example.org'
+IMAGE='gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:latest'
+REPLICAS='0'
+LETSENCRYPT_EMAIL='admin@example.org'
+
+GITLAB_REGISTRY='gitlab-registry.in2p3.fr'
+GITLAB_REGISTRY_USER='SET_GITLAB_REGISTRY_USER'
+GITLAB_REGISTRY_TOKEN='SET_GITLAB_REGISTRY_TOKEN'
+
+AE_MODEL_PATH='artifacts/ae/lsst'
+ANOMALY_THRESHOLD='SET_AFTER_LSST_MODEL_TRAINING'
+API_TOKEN='SET_A_STRONG_LSST_API_TOKEN'
+SLACK_WEBHOOK_URL=''
+API_ROOT_PATH='/lsst'
+
+

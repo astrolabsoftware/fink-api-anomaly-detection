@@ -201,7 +201,8 @@ This is expected for this simulated example, which contains only a small number 
 
 # deployment in prod
 
-[deploy/](deploy/) contain configuration and kube manifest to deploy each api in k3s single node cluster (server) -- comming soon
+See the [deployment guide](deploy/README.md) for deploying the ZTF and LSST APIs
+to a single-node k3s cluster with shared Traefik ingress and Let's Encrypt TLS.
 
 ---
 
