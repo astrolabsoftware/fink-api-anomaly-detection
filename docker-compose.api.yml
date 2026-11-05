@@ -1,8 +1,9 @@
 services:
 
   api.ztf.fink-portal.log-anomaly-detection:
-    image: gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:latest
-    pull_policy: always
+    build:
+      context: .
+      dockerfile: Dockerfile.api
     restart: unless-stopped  
     env_file:
       - .env.ztf
@@ -12,11 +13,11 @@ services:
 # Uncomment the following lines to enable the LSST anomaly detection API service, only if we have the LSST model (not yet available)
 
 #  api.lsst.fink-portal.log-anomaly-detection:
-#    image: gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:latest
-#    pull_policy: always
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.api
 #    restart: unless-stopped  
 #    env_file:
 #      - .env.lsst
 #    ports:
 #      - "8001:8000"
-
