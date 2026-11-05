@@ -67,12 +67,12 @@ Edit `.env.ztf` and replace `API_TOKEN` (and, if needed, set
 `SLACK_WEBHOOK_URL`). The `.env.*.example` files are templates; Compose does
 not load them directly.
 
-The Compose file starts only the ZTF service by default. It pulls
-`gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api`, maps host port 8000 to
-container port 8000, and reads `.env.ztf`.
+The Compose file starts only the ZTF service by default. It builds the image
+from this repository using `Dockerfile.api`, maps host port 8000 to container
+port 8000, and reads `.env.ztf`.
 
 ```bash
-docker compose -f docker-compose.api.yml up
+docker compose -f docker-compose.api.yml up --build
 ```
 
 Open the ZTF API documentation at **http://127.0.0.1:8000/docs**.
@@ -86,7 +86,8 @@ docker compose -f docker-compose.api.yml down
 The LSST service is commented out in `docker-compose.api.yml`. To enable it,
 first create `.env.lsst` from `.env.lsst.example`, set its `API_TOKEN` and a
 trained model's `ANOMALY_THRESHOLD`, then uncomment the LSST service in the
-Compose file. It maps host port 8001 to container port 8000, so its
+Compose file (including its local `build` configuration). It maps host port
+8001 to container port 8000, so its
 documentation will be available at **http://127.0.0.1:8001/docs**.
 
 
