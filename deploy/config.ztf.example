@@ -1,0 +1,18 @@
+# Copy to config.ztf, then set the real values.
+NAMESPACE='fink-api-anomaly-detection'
+DOMAIN='api.example.org'
+IMAGE='gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:latest'
+REPLICAS='1'
+LETSENCRYPT_EMAIL='admin@example.org'
+
+GITLAB_REGISTRY='gitlab-registry.in2p3.fr'
+GITLAB_REGISTRY_USER='SET_GITLAB_REGISTRY_USER'
+GITLAB_REGISTRY_TOKEN='SET_GITLAB_REGISTRY_TOKEN'
+
+AE_MODEL_PATH='artifacts/ae/ztf'
+ANOMALY_THRESHOLD='0.3608'
+API_TOKEN='SET_A_STRONG_ZTF_API_TOKEN'
+SLACK_WEBHOOK_URL=''
+API_ROOT_PATH='/ztf'
+
+
