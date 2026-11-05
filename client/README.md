@@ -125,6 +125,12 @@ sudo systemctl disable --now nginx-log-exporter
 
 ## Few Resource usage
 
+consumes very, very few resources : 
+```bash 
+    PID %CPU %MEM   RSS    VSZ     ELAPSED CMD
+3737804  0.0  0.1 19536  24720       02:22 python3 client/nginx-log-exporter/nginx_log_exporter.py
+```
+
 Memory usage is proportional to the collected window payload, + a small in-memory cursor map.
 
 Files are streamed rather than loaded entirely into memory. The process sleeps between window deadlines and does not write payloads, state, or log files to disk. Systemd/journald receives its logs.
