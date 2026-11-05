@@ -1,5 +1,5 @@
 
-name: Build and Push Anomaly Detection API image to DockerHub
+name: Build and Push docker image to GitLab Registry
 
 on:
   # Build and publish the image when its sources change on main on pathes 
@@ -9,7 +9,7 @@ on:
     paths:
       - 'Dockerfile.api'
       - '.dockerignore'
-      - '.env.example'
+      - '.env.*.example'
       - 'src/**'
       - 'artifacts/**'
       - 'requirements.api.txt'
@@ -29,29 +29,31 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build --pull --no-cache \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }} \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:latest \
+            -t gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:${{ github.sha }} \
+            -t gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:latest \
             -f Dockerfile.api .
 
       - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           version: v0.76.1
-          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }}
+          image-ref: gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:${{ github.sha }}
           format: table
           exit-code: '1'
           ignore-unfixed: true
           vuln-type: os,library
           severity: CRITICAL,HIGH
           
-      - name: Log in to DockerHub Container Registry
+      - name: Log in to Fink GitLab Container Registry
         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          GITLAB_REGISTRY_USER: ${{ secrets.GITLAB_REGISTRY_USER }}
+          GITLAB_REGISTRY_TOKEN: ${{ secrets.GITLAB_REGISTRY_TOKEN }}
         run: |
-          echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          echo "$GITLAB_REGISTRY_TOKEN" | docker login gitlab-registry.in2p3.fr \
+            -u "$GITLAB_REGISTRY_USER" \
+            --password-stdin
 
-      - name: Push Docker image to DockerHub
+      - name: Push Docker image to GitLab Registry
         run: |
-          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:${{ github.sha }}
-          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ztf.api.fink-portal.log-anomaly-detection:latest
+          docker push gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:${{ github.sha }}
+          docker push gitlab-registry.in2p3.fr/astrolabsoftware/fink/api.fink-portal.log-anomaly-detection-api:latest
