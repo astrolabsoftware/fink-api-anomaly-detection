@@ -3,6 +3,8 @@
 
 /.env.ztf
 /.env.lsst
+/deploy/config.ztf
+/deploy/config.lsst
 # Python
 __pycache__/
 *.py[cod]
