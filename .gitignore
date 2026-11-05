@@ -1,8 +1,8 @@
 # Data
 /data/
 
-/.env
-
+/.env.ztf
+/.env.lsst
 # Python
 __pycache__/
 *.py[cod]

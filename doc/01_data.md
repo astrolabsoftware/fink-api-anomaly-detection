@@ -1,6 +1,6 @@
 # Data
 
-The dataset consists of Nginx logs collected from the Fink API (ztf). The raw data is stored locally in `data/nginx_history_logs/`. It contains **42 compressed `.gz` files**: 14 files per category, with filename dates from **October 4 to October 17, 2026**.
+The dataset consists of Nginx logs collected from the Fink API (ztf). The raw data is stored locally in `data/ztf/nginx_history_logs/`. It contains **42 compressed `.gz` files**: 14 files per category, with filename dates from **October 4 to October 17, 2026**.
 
 The filenames are dated one day after the events they contain. Parsed event timestamps range from **October 3, 2026 at 00:00 UTC** to **October 17, 2026 at 00:00 UTC**. This covers 14 days, with six records in the final partial day. 
 
@@ -12,7 +12,7 @@ The raw logs are excluded from git through the project`.gitignore` file and are 
 
 ## Dataset Structure
 
-The dataset `data/nginx_history_logs` is organized into three categories:
+The dataset `data/ztf/nginx_history_logs` is organized into three categories:
 
 - `access-logs/`: HTTP full request logs recorded by Nginx.
 - `error-logs/`: Nginx error logs.
@@ -93,7 +93,11 @@ Flask application logs may be integrated in a later stage. Also, if needed, addi
 
 ##  Current Limitations
 
-The initial dataset has several limitations:
-
-- **Short observation period:** 14 days provide only two weekly cycles, which is still insufficient to establish robust long-term (monthly cycles) patterns.
+The initial dataset has limitation:
 - **Unknown incident labels:** historical outage timestamps have not been established as part of the dataset.
+
+--- 
+
+# Note for Lsst 
+
+We still collect data just like ztf (data/lsst/nginx_history_logs/)

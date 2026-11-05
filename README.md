@@ -1,12 +1,13 @@
-# Fink API Forecasting & Anomaly Detection
+# Fink API's Anomaly Detection
 
-A data-driven project focused on detecting anomalies and forecasting potential outages in the Fink API using Nginx **log/system-log** analysis and machine learning.
+A data-driven project aimed at detecting anomalies and identifying potential failure signals within Fink APIs through the analysis of Nginx logs and machine learning.
 
 ## Objectives
 
-Analyze `Nginx logs` (the server in front of the Fink API) and, where available, `system logs` (from node-exporter) and the `API Flask application logs` to **detect anomalous patterns with `anomaly-detection` methods and identify potential indicators of service interruptions or outages**, by exploring `forecasting` methods to alert the ops team early enough to intervene before a failure occurs.
+By leveraging **logs from Nginx** a server positioned in front of the Fink APIs (for LSST and ZTF); the objective is to **detect anomalies in the API** using anomaly detection methods, in order to alert the operations team via Slack so that they can intervene if necessary.
 
 ---
+
 ## Documentation
 
 The `doc/` directory documents the problem definition, available data, and modeling methodology.
@@ -21,7 +22,7 @@ The `doc/` directory documents the problem definition, available data, and model
 
 ## Modeling Methodology
 
-The [notebooks/](notebooks/) follow the methodology described gradually in the project documentation. They provide an experimental workflow covering data acquisition, preprocessing, exploration, feature engineering, baseline development, model (whether it beats or not the baseline) development and improvement,evaluation and analysis.
+The [notebooks/](notebooks/) follow the methodology described gradually in the project documentation. They provide -- for the two log sources / two Fink APIs (LSST and ZTF) -- an experimental workflow covering data acquisition, preprocessing, exploration, feature engineering, baseline development, model (whether it beats or not the baseline) development and improvement,evaluation and analysis.
 
 ---
 
@@ -31,7 +32,7 @@ The [notebooks/](notebooks/) follow the methodology described gradually in the p
 
 The FastAPI application exposes two endpoints, `/health` and `/predict`, and serves as the inference interface for the anomaly detection system.
 
-A client submits raw Nginx log lines (access, geo, and error logs) corresponding to a complete 5-minute time window. The API processes these logs, builds the corresponding features, and runs inference using the trained Autoencoder model stored in `artifacts/ae`.
+A client (nginx log exporter installed in each api.server) submits raw Nginx log lines (access, geo, and error logs) corresponding to a complete 5-minute time window. The API processes these logs, builds the corresponding features, and runs inference using the trained Autoencoder model stored in `artifacts/ae/[ZTF/LSST]`.
 
 If an anomaly is detected, the API generates an alert containing relevant information, such as the alert severity and anomaly score, and sends it to the configured Slack channel.
 
@@ -43,51 +44,38 @@ The inference server exposes exactly two application routes:
 - `POST /predict`: accepts one complete 5-minute raw log window and requires the `X-API-Token` header.
 
 
-### Server configuration
+### Server configuration and Docker Compose setup
 
-The following environment variables configure the inference server (in .env):
+Docker Compose reads the service configuration from `.env.ztf` and, when the
+LSST service is enabled, `.env.lsst`.
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `AE_MODEL_PATH` | `artifacts/ae` | Path to the trained Autoencoder and scaler. |
-| `ANOMALY_THRESHOLD` | `0.3608` | Reconstruction error threshold used for anomaly detection. |
-| `API_TOKEN` | Required (Raplace <YOUR_API_TOKEN>) | Shared secret used to authenticate client requests. |
-| `SLACK_WEBHOOK_URL` | optionall (Replace <YOUR_SLACK_WEBHOOK_URL>) | Optional Slack webhook URL used for anomaly notifications. |
+| `AE_MODEL_PATH` | ZTF: `artifacts/ae/ztf`; LSST: `artifacts/ae/lsst` | Path to the trained Autoencoder and scaler inside the image. |
+| `ANOMALY_THRESHOLD` | ZTF: `0.3608`; LSST: set after training | Reconstruction error threshold used for anomaly detection. |
+| `API_TOKEN` | Required | Shared secret used to authenticate client requests. Replace the example value with a strong secret. |
+| `SLACK_WEBHOOK_URL` | Optional | Slack webhook URL used for anomaly notifications. |
 
-
-The repository includes a `.env.example` file containing the default configuration. Copy it to `.env` and replace the example `API_TOKEN` with a strong secret before starting the server.
-
-The `.env` file is ignored by Git and excluded from the Docker build context. `.env.example` is only a configuration template; it is not loaded by the application.
-
-```bash 
-cp .env.example .env
-```
-Then Edit .env and set API_TOKEN (and optionally SLACK_WEBHOOK_URL).
-
-## There is 2 setup mode (manual and docker):
-
-### Setup (Manual)
-
-On the inference host, install only the runtime dependencies and configure the root `.env` file.
+Create the ZTF environment file expected by the active Compose service and set
+its token before starting the API:
 
 ```bash
-python -m venv venv 
-source venv/bin/activate 
-python -m pip install -r requirements.api.txt
-
-python -m uvicorn fink_api_anomaly_detection.api:app  --app-dir src --env-file .env --host 0.0.0.0 --port 8000
+cp .env.ztf.example .env.ztf
 ```
 
+Edit `.env.ztf` and replace `API_TOKEN` (and, if needed, set
+`SLACK_WEBHOOK_URL`). The `.env.*.example` files are templates; Compose does
+not load them directly.
 
-### Setup (Docker)
-
-To pull and run the published image from Docker Hub, first configure `.env` as described above, then run:
+The Compose file starts only the ZTF service by default. It pulls
+`massmach/api.fink-portal.log-anomaly-detection:latest`, maps host port 8000 to
+container port 8000, and reads `.env.ztf`.
 
 ```bash
 docker compose -f docker-compose.api.yml up
 ```
 
-Compose pulls `massmach/ztf.api.fink-portal.log-anomaly-detection:latest`
+Open the ZTF API documentation at **http://127.0.0.1:8000/docs**.
 
 Stop the service with `Ctrl+C`, then remove its container with:
 
@@ -95,9 +83,14 @@ Stop the service with `Ctrl+C`, then remove its container with:
 docker compose -f docker-compose.api.yml down
 ```
 
-To build the image locally instead, use `docker build -f Dockerfile.api -t fink-api-anomaly-detection .`.
+The LSST service is commented out in `docker-compose.api.yml`. To enable it,
+first create `.env.lsst` from `.env.lsst.example`, set its `API_TOKEN` and a
+trained model's `ANOMALY_THRESHOLD`, then uncomment the LSST service in the
+Compose file. It maps host port 8001 to container port 8000, so its
+documentation will be available at **http://127.0.0.1:8001/docs**.
 
-## Example API execution
+
+## Example API execution (ZTF)
 
 ### Accessing the API documentation
 
@@ -205,9 +198,15 @@ This is expected for this simulated example, which contains only a small number 
 
 ---
 
+# deployment in prod
+
+[deploy/](deploy/) contain configuration and kube manifest to deploy each api in k3s single node cluster (server) -- comming soon
+
+---
+
 # Nginx log exporter client
 
-The client is designed to run directly on the Nginx server.
+The client is designed to run directly on the Nginx server of each api.
 
 Its role is to collect raw Nginx access, geo, and error log lines, organize them into 5-minute windows, and send these windows to the inference API through requests to `POST /predict` (for inference)
 
