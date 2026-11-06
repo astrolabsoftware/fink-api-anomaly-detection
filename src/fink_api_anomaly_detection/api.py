@@ -258,21 +258,9 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
     ])
 
     traffic_lines = [
-        f"• Total requests in window: *{request_count}*",
-        f"• HTTP 4xx: *{http_4xx_count}* ({http_4xx_rate:.0%})",
-        f"• HTTP 5xx: *{http_5xx_count}* ({http_5xx_rate:.0%})",
+        f"• HTTP 4xx: *{http_4xx_count}* ({http_4xx_rate:.2%})",
+        f"• HTTP 5xx: *{http_5xx_count}* ({http_5xx_rate:.2%})"
     ]
-
-    blocks.extend([
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "*📊 Traffic analysis*\n" + "\n".join(traffic_lines),
-            },
-        },
-        {"type": "divider"},
-    ])
 
     endpoint_lines = ["*🔎 Endpoint activity*"]
 
@@ -280,17 +268,17 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
         endpoint_lines.extend([
             (
                 f"• `/api/v1`: *{api_count}/{request_count}* "
-                f"({api_count / request_count:.0%})"
+                f"({api_count / request_count:.2%})"
             ),
             (
                 f"• Outside `/api/v1`: *{unrecognized_count}/{request_count}* "
-                f"({unrecognized_rate:.0%})"
+                f"({unrecognized_rate:.2%})"
             ),
         ])
     else:
         endpoint_lines.append("• No HTTP requests observed.")
 
-    if unrecognized_rate > 0.20 and is_anomaly:
+    if unrecognized_rate > 0 and is_anomaly:
         top_endpoint = labels["top_unrecognized_endpoint"]
 
         if top_endpoint:
@@ -301,7 +289,7 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
                 f"({top_count} request(s))"
             )
             endpoint_lines.append(
-                "• Possible invalid or probing endpoint."
+                " > Possible invalid or probing endpoint."
             )
 
         if request_count < 10:
@@ -309,23 +297,9 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
                 "⚠️ Small sample: interpret this analysis with caution."
             )
 
-    blocks.extend([
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "\n".join(endpoint_lines),
-            },
-        },
-        {"type": "divider"},
-    ])
-
     nginx_lines = ["*🖥️ Nginx error analysis*"]
 
     if nginx_count:
-        nginx_lines.append(
-            f"• Error log entries: *{nginx_count}*"
-        )
 
         if request_count:
             nginx_lines.append(
@@ -347,17 +321,6 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
 
     else:
         nginx_lines.append("• No Nginx error log entries.")
-
-    blocks.extend([
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "\n".join(nginx_lines),
-            },
-        },
-        {"type": "divider"},
-    ])
 
     raw_non_france_share = features.get("top_country_share_without_france")
     non_france_share: float | None = None
@@ -426,7 +389,7 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
 
         if non_france_share is not None and non_france_share > 0 and country is not None:
             geography_lines.append(
-                f"• Share of {country} traffic from non-France (foreign) traffic: *{non_france_share:.0%}*"
+                f"• Share of {country} traffic from non-France (foreign) traffic: *{non_france_share:.2%}*"
             )
             if is_anomaly and non_france_share == 1.0:
                 geography_lines.append(
@@ -442,10 +405,24 @@ def _build_anomaly_summary( features: dict[str, Any],labels: dict[str, Any],*,
 
     blocks.append({
         "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": "\n".join(geography_lines),
-        },
+        "fields": [
+            {
+                "type": "mrkdwn",
+                "text": "*📊 Traffic analysis*\n" + "\n".join(traffic_lines),
+            },
+            {
+                "type": "mrkdwn",
+                "text": "\n".join(endpoint_lines),
+            },
+            {
+                "type": "mrkdwn",
+                "text": "\n".join(nginx_lines),
+            },
+            {
+                "type": "mrkdwn",
+                "text": "\n".join(geography_lines),
+            },
+        ],
     })
 
 
